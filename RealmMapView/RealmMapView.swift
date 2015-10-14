@@ -76,11 +76,21 @@ public class RealmMapView: MKMapView {
     ///
     /// Default is 20, which means clustering will occur at every zoom level if clusterAnnotations is YES
     public var maxZoomLevelForClustering: ABFZoomLevel = 20
+  
+    //Represent the state of the bubble for the Annotation
+    //
+    //Default is enabled
+    public var canShowBubble : Bool = true
     
     // MARK: Functions
     
     /// Performs a fresh fetch for Realm objects based on the current visible map rect
     public func refreshMapView() {
+      
+        if assertConfig() {
+            return
+        }
+      
         objc_sync_enter(self)
         
         self.mapQueue.cancelAllOperations()
@@ -249,6 +259,27 @@ public class RealmMapView: MKMapView {
         rlmConfiguration.schemaVersion = configuration.schemaVersion
         return rlmConfiguration
     }
+  
+    public func config(entityName : String!, latitudeKeyPath : String!, longitudeKeyPath : String!, titleKeyPath : String!, subtitleKeyPath : String!) {
+        self.entityName = entityName
+        self.latitudeKeyPath = latitudeKeyPath
+        self.longitudeKeyPath = longitudeKeyPath
+        self.titleKeyPath = titleKeyPath
+        self.subtitleKeyPath = subtitleKeyPath
+    }
+  
+    private func assertConfig() -> Bool {
+        if self.entityName == nil
+            || self.latitudeKeyPath == nil
+            || self.longitudeKeyPath == nil
+            || self.titleKeyPath == nil
+            || self.subtitleKeyPath == nil {
+                print("You MUST configure the RealmMapView at the StoryBoard or use the config(...) method")
+                return true
+            }
+        return false
+    }
+  
 }
 
 /**
@@ -307,6 +338,8 @@ extension RealmMapView: MKMapViewDelegate {
             
             annotationView!.count = UInt(fetchedAnnotation.safeObjects.count)
             annotationView!.annotation = fetchedAnnotation
+          
+            annotationView?.canShowCallout = canShowBubble
             
             return annotationView!
         }
@@ -315,7 +348,7 @@ extension RealmMapView: MKMapViewDelegate {
     }
     
     public func mapView(mapView: MKMapView, didAddAnnotationViews views: [MKAnnotationView]) {
-        
+        assertConfig()
         if let delegate = self.externalDelegate, let method = delegate.mapView?(mapView, didAddAnnotationViews: views) {
             method
         }
