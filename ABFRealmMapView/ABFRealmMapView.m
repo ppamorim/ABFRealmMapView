@@ -426,6 +426,8 @@ static NSString * const ABFAnnotationViewReuseId = @"ABFAnnotationViewReuseId";
 {
     @synchronized(self) {
         [self.mapQueue cancelAllOperations];
+      
+        assertConfig();
         
         MKCoordinateRegion currentRegion = self.region;
         
@@ -471,6 +473,25 @@ static NSString * const ABFAnnotationViewReuseId = @"ABFAnnotationViewReuseId";
         
         [self.mapQueue addOperation:refreshOperation];
     }
+}
+
+- (void)configure(NSString entityName, NSString latitudeKeyPath, NSString longitudeKeyPath, NSString titleKeyPath, NSString subtitleKeyPath)
+{
+    _entityName = entityName;
+    _latitudeKeyPath = latitudeKeyPath;
+    _longitudeKeyPath = longitudeKeyPath;
+    _titleKeyPath = titleKeyPath;
+    _subtitleKeyPath = subtitleKeyPath;
+}
+
+- (Bool)assertConfig()
+{
+  if(_entityName == nil || _latitudeKeyPath == nil || _longitudeKeyPath == nil)
+  {
+    printf("Warning: You MUST configure RealmMapView properties: entityName, latitudeKeyPath, and longitudeKeyPath before refreshMapView is called. Aborting refresh.");
+    return true;
+  }
+  return false;
 }
 
 #pragma mark - Private Instance

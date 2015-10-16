@@ -35,7 +35,7 @@ public class RealmMapView: MKMapView {
     public var realm: Realm {
         return try! Realm(configuration: self.realmConfiguration)
     }
-    
+  
     /// The internal controller that fetches the Realm objects
     public var fetchedResultsController: ABFLocationFetchedResultsController = {
         let controller = ABFLocationFetchedResultsController()
